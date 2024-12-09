@@ -1,30 +1,57 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
+import { toast } from "sonner";
 
-const FileUpload = () => {
+interface FileUploadProps {
+  setViewState: React.Dispatch<
+    React.SetStateAction<{ [key: string]: boolean }>
+  >;
+  setDataFrameTable: Dispatch<SetStateAction<never[]>>;
+}
+
+const FileUpload: React.FC<FileUploadProps> = ({
+  setViewState,
+  setDataFrameTable,
+}) => {
   const [file, setFile] = useState<File | null>(null); // State to store the file
   const [fileName, setFileName] = useState<string>(""); // State to store the file name
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]; // Safely access the first file
+    const selectedFile = e.target.files?.[0];
+    e.target.value = ""; // Reset input value to allow re-selection of the same file
     if (selectedFile) {
-      setFile(selectedFile); // Store the file object
-      setFileName(selectedFile.name); // Update the filename in the state for display
+      if (selectedFile.type === "text/csv") {
+        setFile(selectedFile);
+        setFileName(selectedFile.name);
+        return;
+      } else {
+        setFile(null);
+        setFileName("");
+        toast.error("Please upload a valid CSV file.");
+        return;
+      }
     } else {
       setFile(null);
       setFileName("");
+      return;
     }
   };
 
   const handleUploadFile = async () => {
     if (!file) {
-      console.error("No file selected");
+      toast.error("No file selected");
       return;
     }
 
+    setViewState((prev) => ({
+      ...prev,
+      spinner: true, // Show spinner
+      fileUpload: false, // Hide file upload
+    }));
+
     try {
       const formData = new FormData();
-      formData.append("file", file); // Append the file object to the form data
+      formData.append("file", file);
 
       const response = await fetch("/api/uploadFile", {
         method: "POST",
@@ -32,19 +59,71 @@ const FileUpload = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorResponse = await response.json();
+        throw new Error(
+          errorResponse.message || `HTTP error! status: ${response.status}`
+        );
       }
 
-      const data = await response.json();
-      console.log(data); // Log the response from the server
-    } catch (error) {
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Unable to read server response.");
+      }
+
+      const decoder = new TextDecoder("utf-8");
+      let jsonifiedDataFrame = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Decode and handle the message from the server
+        const rawMessage = decoder.decode(value, { stream: true }).trim();
+        if (rawMessage) {
+          try {
+            const messageObj = JSON.parse(rawMessage); // Parse the message as JSON
+
+            if (messageObj.status === 1) {
+              toast.success(messageObj.message); // Success toast for status 1
+            } else if (messageObj.status === -1) {
+              toast.error(messageObj.message); // Error toast for status -1
+            } else {
+              //   toast(messageObj.message); // General toast for other cases
+            }
+
+            // Capture the dataframe if present
+            if (messageObj.data) {
+              jsonifiedDataFrame = messageObj.data; // Store the dataframe for later use
+            }
+          } catch (error) {
+            console.error("Error parsing message:", error);
+            toast.error("Invalid server message format");
+          }
+        }
+      }
+
+      // Log the JSON-serialized dataframe after the stream ends
+      if (jsonifiedDataFrame) {
+        setDataFrameTable(jsonifiedDataFrame);
+        toast.success("DataFrame formed");
+        console.log("Final DataFrame:", jsonifiedDataFrame);
+      }
+    } catch (error: any) {
+      toast.error(`Error uploading file: ${error.message || "Unknown error"}`);
       console.error("Error uploading file:", error);
+    } finally {
+      setViewState((prev) => ({
+        ...prev,
+        spinner: false, // Show spinner
+        fileUpload: true, // Hide file upload
+      }));
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <p className="text-5xl font-bold mb-6">Alternatives Bulk Update</p>
+      <p className="text-4xl font-bold mb-6">Alternatives Bulk Update</p>
 
       {/* File Input */}
       <div className="mb-4">
@@ -84,7 +163,7 @@ const FileUpload = () => {
       {/* Upload Button */}
       {file && (
         <button
-          className={`border border-blue-500 p-3 rounded hover:text-white hover:bg-blue-500 flex items-center justify-between`}
+          className={`border border-blue-500 p-3 rounded hover:text-white hover:bg-blue-500 flex items-center justify-between transition-all duration-200`}
           onClick={handleUploadFile}
         >
           <span>
