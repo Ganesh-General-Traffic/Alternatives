@@ -1,10 +1,7 @@
 from flask import Flask, send_from_directory, render_template,jsonify, request,Response, stream_with_context
-
 import os, io, time
 import pandas as pd
-
 import json
-
 from flask_cors import CORS
 
 from db import checkIfInProductTable, getNAlternatives
@@ -21,8 +18,6 @@ def serve(path):
         return send_from_directory("build", path)
     else:
         return render_template("index.html")
-    
-@app.route("/uploadFile", methods=["POST"])
 
 
 @app.route("/uploadFile", methods=["POST"])
