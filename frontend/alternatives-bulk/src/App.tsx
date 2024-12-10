@@ -45,11 +45,13 @@ const App: React.FC = () => {
         </div>
       )}
       {viewState.table && (
-        <PaginatedTable
-          dataFrameTable={dataFrameTable}
-          existingClusterColumn={existingClusterColumn}
-          newPartColumn={newPartColumn}
-        />
+        <div className="max-w-7xl min-w-7xl mx-auto">
+          <PaginatedTable
+            dataFrameTable={dataFrameTable}
+            existingClusterColumn={existingClusterColumn}
+            newPartColumn={newPartColumn}
+          />
+        </div>
       )}
     </>
   );

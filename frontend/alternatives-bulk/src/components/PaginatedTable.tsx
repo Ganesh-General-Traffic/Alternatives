@@ -85,7 +85,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
   };
 
   const paginationButtonClassName =
-    "px-3 py-1 border rounded mx-1 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-lg";
+    "px-3 py-1 border rounded m-1 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-lg";
 
   const [tooltipTopPos, settooltipTopPos] = useState(0);
   const [tooltipLeftPos, settooltipLeftPos] = useState(0);
@@ -276,7 +276,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
             </button>
 
             {/* Page Number Buttons */}
-            <div className="max-w-3/4 flex-wrap space-y-2">
+            <div className="max-w-3/4 flex-wrap items-center gap-2">
               {Array.from({ length: totalPages }, (_, index) => (
                 <button
                   key={index}
