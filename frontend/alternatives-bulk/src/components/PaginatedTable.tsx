@@ -119,20 +119,18 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
             {currentData
               .filter((item) => (showBadRows ? item.isBadRow : true)) // Show only bad rows if checked
               .map((item, rowIndex) => {
-                // Check if any column (excluding isBadRow) has `false`
-                const hasFalse = Object.keys(item)
-                  .filter((key) => key !== "isBadRow") // Exclude isBadRow
-                  .some((key) => item[key] === false);
+                // Check if isBadRow is true
+                const isBadRow = item.isBadRow === true;
 
                 return (
                   <tr
                     key={rowIndex}
                     className={`border-b hover:bg-gray-100 ${
-                      hasFalse ? "text-red-500" : ""
+                      isBadRow ? "text-red-500" : ""
                     }`}
                   >
                     {Object.keys(item)
-                      .filter((key) => key !== "isBadRow") // Exclude isBadRow
+                      .filter((key) => key !== "isBadRow") // Exclude isBadRow from displayed columns
                       .map((key, colIndex) => (
                         <td className="py-2" key={colIndex}>
                           {typeof item[key] === "boolean"
@@ -147,56 +145,58 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
         </table>
 
         {/* Pagination Controls */}
-        <div className="flex justify-center items-center mt-4">
-          {/* Go to First Page Button */}
-          <button
-            className={paginationButtonClassName}
-            onClick={() => handlePageChange(1)}
-            disabled={currentPage === 1}
-          >
-            First
-          </button>
-
-          {/* Previous Page Button */}
-          <button
-            className={paginationButtonClassName}
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </button>
-
-          {/* Page Number Buttons */}
-          {Array.from({ length: totalPages }, (_, index) => (
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center mt-4">
+            {/* Go to First Page Button */}
             <button
-              key={index}
-              className={`${paginationButtonClassName} ${
-                currentPage === index + 1 ? "bg-gray-300" : ""
-              }`}
-              onClick={() => handlePageChange(index + 1)}
+              className={paginationButtonClassName}
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
             >
-              {index + 1}
+              First
             </button>
-          ))}
 
-          {/* Next Page Button */}
-          <button
-            className={paginationButtonClassName}
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
+            {/* Previous Page Button */}
+            <button
+              className={paginationButtonClassName}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
 
-          {/* Go to Last Page Button */}
-          <button
-            className={paginationButtonClassName}
-            onClick={() => handlePageChange(totalPages)}
-            disabled={currentPage === totalPages}
-          >
-            Last
-          </button>
-        </div>
+            {/* Page Number Buttons */}
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                className={`${paginationButtonClassName} ${
+                  currentPage === index + 1 ? "bg-gray-300" : ""
+                }`}
+                onClick={() => handlePageChange(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            {/* Next Page Button */}
+            <button
+              className={paginationButtonClassName}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+
+            {/* Go to Last Page Button */}
+            <button
+              className={paginationButtonClassName}
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            >
+              Last
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

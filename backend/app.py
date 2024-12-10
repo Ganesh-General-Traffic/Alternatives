@@ -54,8 +54,11 @@ def upload_file():
         # yield json.dumps({"message": "Replacing NaN values...", "status": 1}) 
         try:
             df.fillna("",inplace=True)
+            df = df[~((df.iloc[:, 0] == "") & (df.iloc[:, 1] == ""))]
             df = df[df.columns[:2]]
-            yield json.dumps({"message": "Dropped Columns.", "status": 1})
+            df.drop_duplicates(subset=df.columns[:2], keep='first', inplace=True)
+
+            yield json.dumps({"message": "Dropped Unnecessary Columns and duplicate rows.", "status": 1})
         except Exception as e:
             yield json.dumps({"message": f"Error replacing NaN values: {str(e)}", "status": -1})
             return
@@ -72,13 +75,17 @@ def upload_file():
             df[present_in_products_col] = df[col].apply(lambda x : checkIfInProductTable(x) if x else False)
             df[nAlts_col] = df[col].apply(lambda x : getNAlternatives(x) if x else "")
         
-        time.sleep(0.5)  # Simulate delay
-        yield json.dumps({"message": "Tagging Bad Columns", "status": 1})
+        time.sleep(0.75)  # Simulate delay
+
+        print("\nStep 4")
+        yield json.dumps({"message": "Tagging Bad Rows", "status": 0})
         badRows = df.apply(lambda row: any(x == "" or x is False for x in row), axis=1)
         df["isBadRow"] = badRows
+
+        time.sleep(0.5)  # Simulate delay
         
         
-        yield json.dumps({"data" : df.to_dict(orient='records'), "status":1})
+        yield json.dumps({"data" : df.to_dict(orient='records'), "status":1, "message":"Sending Data.."})
         # return jsonify()
         
         # time.sleep(0.5)  # Simulate delay        

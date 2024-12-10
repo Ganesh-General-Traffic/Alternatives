@@ -90,7 +90,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             } else if (messageObj.status === -1) {
               toast.error(messageObj.message); // Error toast for status -1
             } else {
-              //   toast(messageObj.message); // General toast for other cases
+              toast.info(messageObj.message); // General toast for other cases
             }
 
             // Capture the dataframe if present
@@ -101,6 +101,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
           } catch (error) {
             console.error("Error parsing message:", error);
             toast.error("Invalid server message format");
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
           }
         }
       }
