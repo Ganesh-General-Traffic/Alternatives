@@ -5,11 +5,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api": {
+      "/uploadFile": {
         target: "http://localhost:3000", // Flask backend
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ""), // Remove `/api` prefix before forwarding
       },
     },
   },
