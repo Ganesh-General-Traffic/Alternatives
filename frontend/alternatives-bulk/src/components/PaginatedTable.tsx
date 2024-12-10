@@ -96,7 +96,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
           left: `${tooltipLeftPos}px`,
           opacity: `${tooltipVisible ? "1" : "0"}`,
         }}
-        className={`absolute z-5 bg-gray-700 text-white p-2 rounded transition-all duration-100`}
+        className={`absolute z-1 bg-gray-700 text-white p-2 rounded transition-all duration-100`}
       >
         <span className="text-gray-300">{tooltipText}</span>
       </div>
@@ -178,7 +178,6 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                         }}
                         onMouseLeave={() => {
                           settooltipVisible(false);
-                          settooltipText("");
                         }}
                       >
                         <div className="flex items-center max-w-max mx-auto">
