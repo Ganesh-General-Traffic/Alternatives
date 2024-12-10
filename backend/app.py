@@ -70,7 +70,7 @@ def upload_file():
             df[present_in_products_col] = df[col].apply(lambda x : checkIfInProductTable(x) if x else False)
             df[nAlts_col] = df[col].apply(lambda x : getNAlternatives(x) if x else "")
         
-        time.sleep(0.75)  # Simulate delay
+        time.sleep(1)  # Simulate delay
 
         print("\nStep 4")
         yield json.dumps({"message": "Tagging Bad Rows", "status": 0})
@@ -79,30 +79,47 @@ def upload_file():
         df["isBadRow"] = badRows
 
 
-        time.sleep(0.5)  # Simulate delay
+        # time.sleep(0.5)  # Simulate delay
 
-        nAlts_columns = [col for col in df.columns if col.endswith("_NAlts")]
-        # Ensure columns are converted to integers with "" replaced by 0
-        for col in nAlts_columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
+        # nAlts_columns = [col for col in df.columns if col.endswith("_NAlts")]
+        # # Ensure columns are converted to integers with "" replaced by 0
+        # for col in nAlts_columns:
+        #     df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
         
-        sums = {col: df[col].sum() for col in nAlts_columns}
-        # Find the column with the larger sum and the smaller sum
-        existingClusterColumn = max(sums, key=sums.get).replace("_NAlts", "")
-        newPartColumn = min(sums, key=sums.get).replace("_NAlts", "")
+        # sums = {col: df[col].sum() for col in nAlts_columns}
+        # # Find the column with the larger sum and the smaller sum
+        # existingClusterColumn = max(sums, key=sums.get).replace("_NAlts", "")
+        # newPartColumn = min(sums, key=sums.get).replace("_NAlts", "")
 
+        # if(existingClusterColumn == newPartColumn):
+        #     existingClusterColumn = ""
+        #     newPartColumn = ""
+
+        # yield json.dumps({"status":0, 
+        #                   "message":"Verifying Cluster columns...",
+        #                   "existingClusterColumn":existingClusterColumn,
+        #                   "newPartColumn":newPartColumn})
+        
         yield json.dumps({"status":0, 
                           "message":"Verifying Cluster columns...",
-                          "existingClusterColumn":existingClusterColumn,
-                          "newPartColumn":newPartColumn})
+                          "existingClusterColumn":"",
+                          "newPartColumn":""})
 
         time.sleep(0.5)
 
-        yield json.dumps({"data" : df.to_dict(orient='records'), "status":0, "message":"Sending Data.."})
-        # return jsonify()
-        print("\nDone")
-        
-        # time.sleep(0.5)  # Simulate delay        
+        # Step 4: Chunked Data Yielding
+        chunk_size = 100
+        total_chunks = (len(df) + chunk_size - 1) // chunk_size  # Calculate total number of chunks
+
+        for chunk_index, start_row in enumerate(range(0, len(df), chunk_size), start=1):
+            chunk = df.iloc[start_row:start_row + chunk_size]  # Slice the DataFrame into chunks
+            yield json.dumps({
+                "data": chunk.to_dict(orient='records'),
+                "status": 0,
+                "message": f"Sending chunk {chunk_index} of {total_chunks}..."
+            })
+            time.sleep(0.5)  # Optional: simulate delay
+
 
     return Response(process_file(), mimetype="text/event-stream")
 

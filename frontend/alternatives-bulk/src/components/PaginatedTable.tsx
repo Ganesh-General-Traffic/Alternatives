@@ -80,6 +80,10 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
     );
   };
 
+  const badRowsPresent = () => {
+    return dataFrameTable.some((row) => row.isBadRow === true);
+  };
+
   const paginationButtonClassName =
     "px-3 py-1 border rounded mx-1 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-lg";
 
@@ -109,22 +113,25 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
         </button>
       </div>
 
-      <div className="flex items-center">
-        <div className="flex item-center my-4 max-w-max select-none">
-          <input
-            type="checkbox"
-            name="badRowsCheckBox"
-            id="badRowsCheckBox"
-            className="h-[25px] w-[25px] cursor-pointer"
-            onChange={(e) => setShowBadRows(e.target.checked)}
-          />
-          <label
-            htmlFor="badRowsCheckBox"
-            className="mx-3 text-md cursor-pointer"
-          >
-            Show Bad Rows
-          </label>
-        </div>
+      <div className="flex items-center my-4">
+        {badRowsPresent() && (
+          <div className="flex item-center max-w-max select-none">
+            <input
+              type="checkbox"
+              name="badRowsCheckBox"
+              id="badRowsCheckBox"
+              className="h-[25px] w-[25px] cursor-pointer"
+              onChange={(e) => setShowBadRows(e.target.checked)}
+            />
+            <label
+              htmlFor="badRowsCheckBox"
+              className="mx-3 text-md cursor-pointer"
+            >
+              Show Bad Rows
+            </label>
+          </div>
+        )}
+
         <div className="flex items-center">
           <input
             type="checkbox"
@@ -214,9 +221,17 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                       .filter((key) => !columnsToHide.includes(key)) // Exclude columns in columnsToHide
                       .map((key, colIndex) => (
                         <td className="py-2" key={colIndex}>
-                          {typeof item[key] === "boolean"
-                            ? item[key].toString()
-                            : item[key]}
+                          {key === "Processed" ? (
+                            item[key] === true ? (
+                              <span className="text-green-500">✅</span> // Render tick for true
+                            ) : (
+                              <span className="text-red-500">❌</span> // Render cross for false
+                            )
+                          ) : typeof item[key] === "boolean" ? (
+                            item[key].toString()
+                          ) : (
+                            item[key]
+                          )}
                         </td>
                       ))}
                   </tr>
@@ -229,12 +244,14 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
               Showing Bad Rows
             </caption>
           )}
-          <caption className="my-2">
-            Parts from <span className="text-blue-500">{newPartColumn}</span>{" "}
-            will be added to{" "}
-            <span className="text-green-500">{existingClusterColumn}</span>{" "}
-            clusters
-          </caption>
+          {newPartColumn && existingClusterColumn && (
+            <caption className="my-2">
+              Parts from <span className="text-blue-500">{newPartColumn}</span>{" "}
+              will be added to{" "}
+              <span className="text-green-500">{existingClusterColumn}</span>{" "}
+              clusters
+            </caption>
+          )}
         </table>
 
         {/* Pagination Controls */}
@@ -259,17 +276,19 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
             </button>
 
             {/* Page Number Buttons */}
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index}
-                className={`${paginationButtonClassName} ${
-                  currentPage === index + 1 ? "bg-gray-300" : ""
-                }`}
-                onClick={() => handlePageChange(index + 1)}
-              >
-                {index + 1}
-              </button>
-            ))}
+            <div className="max-w-3/4 flex-wrap space-y-2">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  className={`${paginationButtonClassName} ${
+                    currentPage === index + 1 ? "bg-gray-300" : ""
+                  }`}
+                  onClick={() => handlePageChange(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
 
             {/* Next Page Button */}
             <button

@@ -57,7 +57,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("/api/uploadFile", {
+      const response = await fetch("/uploadFile", {
         method: "POST",
         body: formData,
       });
@@ -76,36 +76,35 @@ const FileUpload: React.FC<FileUploadProps> = ({
       }
 
       const decoder = new TextDecoder("utf-8");
-      let jsonifiedDataFrame = null;
+
+      let accumulatedDataFrame: any[] = []; // Create a list to store accumulated data
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        // Decode and handle the message from the server
         const rawMessage = decoder.decode(value, { stream: true }).trim();
         if (rawMessage) {
           try {
-            const messageObj = JSON.parse(rawMessage); // Parse the message as JSON
+            const messageObj = JSON.parse(rawMessage);
 
             if (messageObj.status === 1) {
-              toast.success(messageObj.message); // Success toast for status 1
+              toast.success(messageObj.message);
             } else if (messageObj.status === -1) {
-              toast.error(messageObj.message); // Error toast for status -1
+              toast.error(messageObj.message);
             } else {
-              toast.info(messageObj.message); // General toast for other cases
+              toast.info(messageObj.message);
             }
 
             if (messageObj.existingClusterColumn && messageObj.newPartColumn) {
-              // console.log(messageObj);
               setNewPartColumn(messageObj.newPartColumn);
               setExistingClusterColumn(messageObj.existingClusterColumn);
             }
 
-            // Capture the dataframe if present
             if (messageObj.data) {
-              jsonifiedDataFrame = messageObj.data;
-              break; // Store the dataframe for later use
+              accumulatedDataFrame = accumulatedDataFrame.concat(
+                messageObj.data
+              ); // Append new data
             }
           } catch (error) {
             console.error("Error parsing message:", error);
@@ -117,21 +116,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
       }
 
-      // Log the JSON-serialized dataframe after the stream ends
-      if (jsonifiedDataFrame) {
-        // Add 'Processed' column with all rows set to false
-        const updatedDataFrame = jsonifiedDataFrame.map((row: any) => ({
+      // After streaming ends, update the DataFrameTable state
+      if (accumulatedDataFrame.length > 0) {
+        const updatedDataFrame = accumulatedDataFrame.map((row: any) => ({
           ...row,
-          Processed: false, // Add the Processed column
+          Processed: false, // Add 'Processed' column with all rows set to false
         }));
 
-        // Set the updated DataFrame
         setDataFrameTable(updatedDataFrame);
 
-        // Show success toast
         toast.success("DataFrame formed");
 
-        // Update view state
         setViewState((prev) =>
           Object.keys(prev).reduce((acc, key) => {
             acc[key as keyof ViewState] = key === "table";
