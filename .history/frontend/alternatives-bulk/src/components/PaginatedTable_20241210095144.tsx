@@ -24,7 +24,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
   };
 
   const paginationButtonClassName =
-    "px-3 py-1 border rounded mx-1 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-lg";
+    "px-3 py-1 border rounded mx-1 hover:bg-blue-500";
 
   return (
     <>

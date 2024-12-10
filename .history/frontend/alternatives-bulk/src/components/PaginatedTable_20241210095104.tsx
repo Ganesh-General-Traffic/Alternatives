@@ -23,8 +23,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
     }
   };
 
-  const paginationButtonClassName =
-    "px-3 py-1 border rounded mx-1 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-lg";
+  const paginationButtonClassName = "px-3 py-1 border rounded mx-1";
 
   return (
     <>
@@ -92,7 +91,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               key={index}
-              className={`${paginationButtonClassName} ${
+              className={`px-3 py-1 border rounded mx-1 ${
                 currentPage === index + 1 ? "bg-gray-300" : ""
               }`}
               onClick={() => handlePageChange(index + 1)}
@@ -103,7 +102,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
 
           {/* Next Page Button */}
           <button
-            className={paginationButtonClassName}
+            className="px-3 py-1 border rounded mx-1"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
@@ -112,7 +111,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
 
           {/* Go to Last Page Button */}
           <button
-            className={paginationButtonClassName}
+            className="px-3 py-1 border rounded mx-1"
             onClick={() => handlePageChange(totalPages)}
             disabled={currentPage === totalPages}
           >
