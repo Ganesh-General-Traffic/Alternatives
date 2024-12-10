@@ -83,8 +83,23 @@ def upload_file():
         df["isBadRow"] = badRows
 
         time.sleep(0.5)  # Simulate delay
+
+        nAlts_columns = [col for col in df.columns if col.endswith("_NAlts")]
+        # Ensure columns are converted to integers with "" replaced by 0
+        for col in nAlts_columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
         
-        
+        sums = {col: df[col].sum() for col in nAlts_columns}
+        # Find the column with the larger sum and the smaller sum
+        existingClusterColumn = max(sums, key=sums.get).replace("_NAlts", "")
+        newPartColumn = min(sums, key=sums.get).replace("_NAlts", "")
+
+        yield json.dumps({"status":0, 
+                          "message":"Verifying Cluster columns...",
+                          "existingClusterColumn":existingClusterColumn,
+                          "newPartColumn":newPartColumn})
+
+        time.sleep(0.5)
 
         yield json.dumps({"data" : df.to_dict(orient='records'), "status":0, "message":"Sending Data.."})
         # return jsonify()

@@ -5,13 +5,16 @@ import { ViewState } from "../App";
 
 interface FileUploadProps {
   setViewState: React.Dispatch<React.SetStateAction<ViewState>>;
-
+  setExistingClusterColumn: React.Dispatch<React.SetStateAction<string>>;
+  setNewPartColumn: React.Dispatch<React.SetStateAction<string>>;
   setDataFrameTable: Dispatch<SetStateAction<{ [key: string]: any }[]>>;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
   setViewState,
   setDataFrameTable,
+  setExistingClusterColumn,
+  setNewPartColumn,
 }) => {
   const [file, setFile] = useState<File | null>(null); // State to store the file
   const [fileName, setFileName] = useState<string>(""); // State to store the file name
@@ -93,6 +96,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
               toast.info(messageObj.message); // General toast for other cases
             }
 
+            if (messageObj.existingClusterColumn && messageObj.newPartColumn) {
+              // console.log(messageObj);
+              setNewPartColumn(messageObj.newPartColumn);
+              setExistingClusterColumn(messageObj.existingClusterColumn);
+            }
+
             // Capture the dataframe if present
             if (messageObj.data) {
               jsonifiedDataFrame = messageObj.data;
@@ -112,7 +121,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       if (jsonifiedDataFrame) {
         setDataFrameTable(jsonifiedDataFrame);
         toast.success("DataFrame formed");
-        console.log("Final DataFrame:", jsonifiedDataFrame);
+        // console.log("Final DataFrame:", jsonifiedDataFrame);
         setViewState((prev) =>
           Object.keys(prev).reduce((acc, key) => {
             acc[key as keyof ViewState] = key === "table";
@@ -123,6 +132,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
     } catch (error: any) {
       toast.error(`Error uploading file: ${error.message || "Unknown error"}`);
       console.error("Error uploading file:", error);
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } finally {
     }
   };

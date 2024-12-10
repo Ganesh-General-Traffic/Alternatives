@@ -2,9 +2,15 @@ import React, { useState } from "react";
 
 interface PaginatedTableProps {
   dataFrameTable: Array<{ [key: string]: any }>;
+  existingClusterColumn: string;
+  newPartColumn: string;
 }
 
-const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
+const PaginatedTable: React.FC<PaginatedTableProps> = ({
+  dataFrameTable,
+  existingClusterColumn,
+  newPartColumn,
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 15;
 
@@ -14,6 +20,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
   } | null>(null);
 
   const [showBadRows, setShowBadRows] = useState(false);
+  const [columnsToHide, setColumnsToHide] = useState<string[]>(["isBadRow"]); // Initialize with isBadRow
 
   // Calculate total pages
   const totalPages = Math.ceil(dataFrameTable.length / rowsPerPage);
@@ -70,7 +77,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
           Change File
         </button>
       </div>
-      <div className="flex item-center my-4 max-w-max">
+      <div className="flex item-center my-4 max-w-max select-none">
         <input
           type="checkbox"
           name="badRowsCheckBox"
@@ -88,30 +95,40 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
       </div>
       <div className="border rounded-lg p-3 shadow-lg">
         <table className="table-fixed">
-          <thead className="border-b">
+          <thead className="border-b select-none">
             <tr>
               {dataFrameTable.length > 0 &&
                 Object.keys(dataFrameTable[0])
-                  .filter((key) => key !== "isBadRow") // Exclude isBadRow
-                  .map((key, index) => (
-                    <th
-                      className="p-2 cursor-pointer hover:underline"
-                      key={index}
-                      onClick={() => handleSort(key)}
-                    >
-                      <div className="flex items-center">
-                        {key}
-                        {sortConfig?.key === key && (
-                          <span
-                            className="ml-1 text-xs align-middle"
-                            style={{ fontSize: "0.75rem" }}
-                          >
-                            {sortConfig.direction === "ascending" ? "▲" : "▼"}
-                          </span>
-                        )}
-                      </div>
-                    </th>
-                  ))}
+                  .filter((key) => !columnsToHide.includes(key)) // Exclude columns in columnsToHide
+                  .map((key, index) => {
+                    // Determine conditional text color
+                    const textColor =
+                      key === existingClusterColumn
+                        ? "text-green-500"
+                        : key === newPartColumn
+                        ? "text-blue-500"
+                        : "";
+
+                    return (
+                      <th
+                        className={`p-2 cursor-pointer hover:underline ${textColor}`}
+                        key={index}
+                        onClick={() => handleSort(key)}
+                      >
+                        <div className="flex items-center">
+                          {key}
+                          {sortConfig?.key === key && (
+                            <span
+                              className="ml-1 text-xs align-middle"
+                              style={{ fontSize: "0.75rem" }}
+                            >
+                              {sortConfig.direction === "ascending" ? "▲" : "▼"}
+                            </span>
+                          )}
+                        </div>
+                      </th>
+                    );
+                  })}
             </tr>
           </thead>
 
@@ -119,18 +136,17 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
             {currentData
               .filter((item) => (showBadRows ? item.isBadRow : true)) // Show only bad rows if checked
               .map((item, rowIndex) => {
-                // Check if isBadRow is true
                 const isBadRow = item.isBadRow === true;
 
                 return (
                   <tr
                     key={rowIndex}
-                    className={`border-b hover:bg-gray-100 ${
+                    className={`border-b hover:bg-gray-200 ${
                       isBadRow ? "text-red-500" : ""
                     }`}
                   >
                     {Object.keys(item)
-                      .filter((key) => key !== "isBadRow") // Exclude isBadRow from displayed columns
+                      .filter((key) => !columnsToHide.includes(key)) // Exclude columns in columnsToHide
                       .map((key, colIndex) => (
                         <td className="py-2" key={colIndex}>
                           {typeof item[key] === "boolean"
@@ -142,11 +158,18 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
                 );
               })}
           </tbody>
+
           {showBadRows && (
             <caption className="caption-bottom text-gray-500 my-2">
               Showing Bad Rows
             </caption>
           )}
+          <caption>
+            Parts from <span className="text-blue-500">{newPartColumn}</span>{" "}
+            will be added to{" "}
+            <span className="text-green-500">{existingClusterColumn}</span>{" "}
+            clusters
+          </caption>
         </table>
 
         {/* Pagination Controls */}

@@ -22,6 +22,10 @@ const App: React.FC = () => {
     Array<{ [key: string]: any }>
   >([]);
 
+  const [existingClusterColumn, setExistingClusterColumn] =
+    useState<string>("");
+  const [newPartColumn, setNewPartColumn] = useState<string>("");
+
   return (
     <>
       <ToastWrapper />
@@ -30,9 +34,17 @@ const App: React.FC = () => {
         <FileUpload
           setViewState={setViewState}
           setDataFrameTable={setDataFrameTable}
+          setExistingClusterColumn={setExistingClusterColumn}
+          setNewPartColumn={setNewPartColumn}
         />
       )}
-      {viewState.table && <PaginatedTable dataFrameTable={dataFrameTable} />}
+      {viewState.table && (
+        <PaginatedTable
+          dataFrameTable={dataFrameTable}
+          existingClusterColumn={existingClusterColumn}
+          newPartColumn={newPartColumn}
+        />
+      )}
     </>
   );
 };
