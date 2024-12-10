@@ -70,13 +70,12 @@ def upload_file():
             present_in_products_col = col + "_PresentInProducts"
             nAlts_col = col + "_NAlts"
             df[present_in_products_col] = df[col].apply(lambda x : checkIfInProductTable(x) if x else False)
-            df[nAlts_col] = df[col].apply(lambda x : getNAlternatives(x) if x else "")
+            df[nAlts_col] = df[col].apply(lambda x : getNAlternatives(x))
+
         
-        time.sleep(0.5)  # Simulate delay
-        yield json.dumps({"message": "Tagging Bad Columns", "status": 1})
-        badRows = df.apply(lambda row: any(x == "" or x is False for x in row), axis=1)
-        df["isBadRow"] = badRows
-        
+
+        # nAlts_cols = [x for x in df.columns if "_NAlts" in x]
+        # df.to_csv('testing.csv',index=False)
         
         yield json.dumps({"data" : df.to_dict(orient='records'), "status":1})
         # return jsonify()

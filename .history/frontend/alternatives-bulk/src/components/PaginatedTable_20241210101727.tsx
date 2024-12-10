@@ -13,8 +13,6 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
     direction: string;
   } | null>(null);
 
-  const [showBadRows, setShowBadRows] = useState(false);
-
   // Calculate total pages
   const totalPages = Math.ceil(dataFrameTable.length / rowsPerPage);
 
@@ -70,19 +68,14 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
           Change File
         </button>
       </div>
-      <div className="flex item-center my-4 max-w-max">
+      <div className="flex cursor-pointer item-center my-4">
         <input
           type="checkbox"
           name="badRowsCheckBox"
           id="badRowsCheckBox"
-          className="h-[25px] w-[25px] cursor-pointer"
-          onChange={(e) => setShowBadRows(e.target.checked)}
+          className="h-[25px] w-[25px]"
         />
-
-        <label
-          htmlFor="badRowsCheckBox"
-          className="mx-3 text-md cursor-pointer"
-        >
+        <label htmlFor="badRowsCheckBox" className="mx-3 text-lg">
           Show Bad Rows
         </label>
       </div>
@@ -116,33 +109,31 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
           </thead>
 
           <tbody>
-            {currentData
-              .filter((item) => (showBadRows ? item.isBadRow : true)) // Show only bad rows if checked
-              .map((item, rowIndex) => {
-                // Check if any column (excluding isBadRow) has `false`
-                const hasFalse = Object.keys(item)
-                  .filter((key) => key !== "isBadRow") // Exclude isBadRow
-                  .some((key) => item[key] === false);
+            {currentData.map((item, rowIndex) => {
+              // Check if any column (excluding isBadRow) has `false`
+              const hasFalse = Object.keys(item)
+                .filter((key) => key !== "isBadRow") // Exclude isBadRow
+                .some((key) => item[key] === false);
 
-                return (
-                  <tr
-                    key={rowIndex}
-                    className={`border-b hover:bg-gray-100 ${
-                      hasFalse ? "text-red-500" : ""
-                    }`}
-                  >
-                    {Object.keys(item)
-                      .filter((key) => key !== "isBadRow") // Exclude isBadRow
-                      .map((key, colIndex) => (
-                        <td className="py-2" key={colIndex}>
-                          {typeof item[key] === "boolean"
-                            ? item[key].toString()
-                            : item[key]}
-                        </td>
-                      ))}
-                  </tr>
-                );
-              })}
+              return (
+                <tr
+                  key={rowIndex}
+                  className={`border-b hover:bg-gray-100 ${
+                    hasFalse ? "text-red-500" : ""
+                  }`}
+                >
+                  {Object.keys(item)
+                    .filter((key) => key !== "isBadRow") // Exclude isBadRow
+                    .map((key, colIndex) => (
+                      <td className="py-2" key={colIndex}>
+                        {typeof item[key] === "boolean"
+                          ? item[key].toString()
+                          : item[key]}
+                      </td>
+                    ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 

@@ -74,8 +74,6 @@ def upload_file():
         
         time.sleep(0.5)  # Simulate delay
         yield json.dumps({"message": "Tagging Bad Columns", "status": 1})
-        badRows = df.apply(lambda row: any(x == "" or x is False for x in row), axis=1)
-        df["isBadRow"] = badRows
         
         
         yield json.dumps({"data" : df.to_dict(orient='records'), "status":1})

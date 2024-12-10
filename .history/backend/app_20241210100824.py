@@ -72,11 +72,6 @@ def upload_file():
             df[present_in_products_col] = df[col].apply(lambda x : checkIfInProductTable(x) if x else False)
             df[nAlts_col] = df[col].apply(lambda x : getNAlternatives(x) if x else "")
         
-        time.sleep(0.5)  # Simulate delay
-        yield json.dumps({"message": "Tagging Bad Columns", "status": 1})
-        badRows = df.apply(lambda row: any(x == "" or x is False for x in row), axis=1)
-        df["isBadRow"] = badRows
-        
         
         yield json.dumps({"data" : df.to_dict(orient='records'), "status":1})
         # return jsonify()

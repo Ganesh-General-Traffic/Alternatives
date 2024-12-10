@@ -13,8 +13,6 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
     direction: string;
   } | null>(null);
 
-  const [showBadRows, setShowBadRows] = useState(false);
-
   // Calculate total pages
   const totalPages = Math.ceil(dataFrameTable.length / rowsPerPage);
 
@@ -70,79 +68,35 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
           Change File
         </button>
       </div>
-      <div className="flex item-center my-4 max-w-max">
-        <input
-          type="checkbox"
-          name="badRowsCheckBox"
-          id="badRowsCheckBox"
-          className="h-[25px] w-[25px] cursor-pointer"
-          onChange={(e) => setShowBadRows(e.target.checked)}
-        />
-
-        <label
-          htmlFor="badRowsCheckBox"
-          className="mx-3 text-md cursor-pointer"
-        >
-          Show Bad Rows
-        </label>
-      </div>
       <div className="border rounded-lg p-3 shadow-lg">
         <table>
           <thead className="border-b">
             <tr>
               {dataFrameTable.length > 0 &&
-                Object.keys(dataFrameTable[0])
-                  .filter((key) => key !== "isBadRow") // Exclude isBadRow
-                  .map((key, index) => (
-                    <th
-                      className="p-2 cursor-pointer hover:underline"
-                      key={index}
-                      onClick={() => handleSort(key)}
-                    >
-                      <div className="flex items-center">
-                        {key}
-                        {sortConfig?.key === key && (
-                          <span
-                            className="ml-1 text-xs align-middle"
-                            style={{ fontSize: "0.75rem" }}
-                          >
-                            {sortConfig.direction === "ascending" ? "▲" : "▼"}
-                          </span>
-                        )}
-                      </div>
-                    </th>
-                  ))}
+                Object.keys(dataFrameTable[0]).map((key, index) => (
+                  <th className="p-2" key={index}>
+                    {key}
+                  </th>
+                ))}
             </tr>
           </thead>
-
           <tbody>
-            {currentData
-              .filter((item) => (showBadRows ? item.isBadRow : true)) // Show only bad rows if checked
-              .map((item, rowIndex) => {
-                // Check if any column (excluding isBadRow) has `false`
-                const hasFalse = Object.keys(item)
-                  .filter((key) => key !== "isBadRow") // Exclude isBadRow
-                  .some((key) => item[key] === false);
-
-                return (
-                  <tr
-                    key={rowIndex}
-                    className={`border-b hover:bg-gray-100 ${
-                      hasFalse ? "text-red-500" : ""
-                    }`}
-                  >
-                    {Object.keys(item)
-                      .filter((key) => key !== "isBadRow") // Exclude isBadRow
-                      .map((key, colIndex) => (
-                        <td className="py-2" key={colIndex}>
-                          {typeof item[key] === "boolean"
-                            ? item[key].toString()
-                            : item[key]}
-                        </td>
-                      ))}
-                  </tr>
-                );
-              })}
+            {currentData.map((item, rowIndex) => (
+              <tr
+                key={rowIndex}
+                className={`border-b hover:bg-gray-100 ${
+                  Object.values(item).includes(false) ? "text-red-600" : ""
+                }`}
+              >
+                {Object.keys(item).map((key, colIndex) => (
+                  <td className="py-2" key={colIndex}>
+                    {typeof item[key] === "boolean"
+                      ? item[key].toString()
+                      : item[key]}
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
 
