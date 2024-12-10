@@ -108,7 +108,7 @@ def upload_file():
         time.sleep(0.5)
 
         # Step 4: Chunked Data Yielding
-        chunk_size = 100
+        chunk_size = 50
         total_chunks = (len(df) + chunk_size - 1) // chunk_size  # Calculate total number of chunks
 
         for chunk_index, start_row in enumerate(range(0, len(df), chunk_size), start=1):
@@ -116,7 +116,7 @@ def upload_file():
             yield json.dumps({
                 "data": chunk.to_dict(orient='records'),
                 "status": 0,
-                "message": f"Sending chunk {chunk_index} of {total_chunks}..."
+                "message": f"Receiving chunk {chunk_index} of {total_chunks}..."
             })
             time.sleep(0.5)  # Optional: simulate delay
 
