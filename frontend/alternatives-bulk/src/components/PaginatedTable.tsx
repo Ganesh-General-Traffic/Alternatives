@@ -12,7 +12,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
   newPartColumn,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 15;
+  const rowsPerPage = 14;
 
   const [sortConfig, setSortConfig] = useState<{
     key: string;
@@ -64,6 +64,22 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
     }
   };
 
+  const handleHideAdditionalColumns = () => {
+    const additionalColumns = Object.keys(dataFrameTable[0]).filter(
+      (key) => key.endsWith("_NAlts") || key.endsWith("_PresentInProducts")
+    );
+
+    setColumnsToHide((prev) => [...new Set([...prev, ...additionalColumns])]);
+  };
+
+  const showAdditionalColumns = () => {
+    setColumnsToHide((prev) =>
+      prev.filter(
+        (key) => !key.endsWith("_NAlts") && !key.endsWith("_PresentInProducts")
+      )
+    );
+  };
+
   const paginationButtonClassName =
     "px-3 py-1 border rounded mx-1 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-lg";
 
@@ -77,24 +93,48 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
           Change File
         </button>
       </div>
-      <div className="flex item-center my-4 max-w-max select-none">
-        <input
-          type="checkbox"
-          name="badRowsCheckBox"
-          id="badRowsCheckBox"
-          className="h-[25px] w-[25px] cursor-pointer"
-          onChange={(e) => setShowBadRows(e.target.checked)}
-        />
 
-        <label
-          htmlFor="badRowsCheckBox"
-          className="mx-3 text-md cursor-pointer"
-        >
-          Show Bad Rows
-        </label>
+      <div className="flex items-center">
+        <div className="flex item-center my-4 max-w-max select-none">
+          <input
+            type="checkbox"
+            name="badRowsCheckBox"
+            id="badRowsCheckBox"
+            className="h-[25px] w-[25px] cursor-pointer"
+            onChange={(e) => setShowBadRows(e.target.checked)}
+          />
+          <label
+            htmlFor="badRowsCheckBox"
+            className="mx-3 text-md cursor-pointer"
+          >
+            Show Bad Rows
+          </label>
+        </div>
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            name="additionalColumnsCheckBox"
+            id="additionalColumnsCheckBox"
+            className="h-[25px] w-[25px] cursor-pointer"
+            onChange={(e) => {
+              if (e.target.checked) {
+                handleHideAdditionalColumns(); // Hide additional columns
+              } else {
+                showAdditionalColumns(); // Show additional columns
+              }
+            }}
+          />
+          <label
+            htmlFor="additionalColumnsCheckBox"
+            className="mx-3 text-md cursor-pointer"
+          >
+            Hide/Show Additional Columns
+          </label>
+        </div>
       </div>
+
       <div className="border rounded-lg p-3 shadow-lg">
-        <table className="table-fixed">
+        <table className="table-fixed min-w-full">
           <thead className="border-b select-none">
             <tr>
               {dataFrameTable.length > 0 &&
@@ -115,7 +155,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                         key={index}
                         onClick={() => handleSort(key)}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center max-w-max mx-auto">
                           {key}
                           {sortConfig?.key === key && (
                             <span
