@@ -204,7 +204,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
               Showing Bad Rows
             </caption>
           )}
-          <caption>
+          <caption className="my-2">
             Parts from <span className="text-blue-500">{newPartColumn}</span>{" "}
             will be added to{" "}
             <span className="text-green-500">{existingClusterColumn}</span>{" "}

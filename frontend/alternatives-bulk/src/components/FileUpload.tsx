@@ -119,9 +119,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       // Log the JSON-serialized dataframe after the stream ends
       if (jsonifiedDataFrame) {
-        setDataFrameTable(jsonifiedDataFrame);
+        // Add 'Processed' column with all rows set to false
+        const updatedDataFrame = jsonifiedDataFrame.map((row: any) => ({
+          ...row,
+          Processed: false, // Add the Processed column
+        }));
+
+        // Set the updated DataFrame
+        setDataFrameTable(updatedDataFrame);
+
+        // Show success toast
         toast.success("DataFrame formed");
-        // console.log("Final DataFrame:", jsonifiedDataFrame);
+
+        // Update view state
         setViewState((prev) =>
           Object.keys(prev).reduce((acc, key) => {
             acc[key as keyof ViewState] = key === "table";
