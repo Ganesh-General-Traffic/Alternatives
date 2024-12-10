@@ -56,7 +56,7 @@ def upload_file():
         except Exception as e:
             yield json.dumps({"message": f"Error replacing NaN values: {str(e)}", "status": -1})
             return
-    
+
         time.sleep(0.5)  # Simulate delay
 
         # Step 3: Processing completed
