@@ -83,8 +83,23 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
   const paginationButtonClassName =
     "px-3 py-1 border rounded mx-1 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-lg";
 
+  const [tooltipTopPos, settooltipTopPos] = useState(0);
+  const [tooltipLeftPos, settooltipLeftPos] = useState(0);
+  const [tooltipVisible, settooltipVisible] = useState(false);
+  const [tooltipText, settooltipText] = useState("");
+
   return (
     <>
+      <div
+        style={{
+          top: `${tooltipTopPos}px`,
+          left: `${tooltipLeftPos}px`,
+          opacity: `${tooltipVisible ? "1" : "0"}`,
+        }}
+        className={`absolute z-5 bg-gray-700 text-white p-2 rounded transition-all duration-100`}
+      >
+        <span className="text-gray-300">{tooltipText}</span>
+      </div>
       <div className="mb-6">
         <button
           className="cursor-pointer bg-blue-500 text-white px-6 py-3 rounded shadow-md hover:bg-blue-600"
@@ -154,6 +169,17 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                         className={`p-2 cursor-pointer hover:underline ${textColor}`}
                         key={index}
                         onClick={() => handleSort(key)}
+                        onMouseEnter={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect(); // Get position of the current <th>
+                          settooltipText(key);
+                          settooltipTopPos(rect.top - 40); // Set tooltip position 100px above the element
+                          settooltipLeftPos(rect.left);
+                          settooltipVisible(true);
+                        }}
+                        onMouseLeave={() => {
+                          settooltipVisible(false);
+                          settooltipText("");
+                        }}
                       >
                         <div className="flex items-center max-w-max mx-auto">
                           {key}
