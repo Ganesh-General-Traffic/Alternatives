@@ -85,8 +85,10 @@ def upload_file():
         time.sleep(0.5)  # Simulate delay
         
         
-        yield json.dumps({"data" : df.to_dict(orient='records'), "status":1, "message":"Sending Data.."})
+
+        yield json.dumps({"data" : df.to_dict(orient='records'), "status":0, "message":"Sending Data.."})
         # return jsonify()
+        print("\nDone")
         
         # time.sleep(0.5)  # Simulate delay        
 

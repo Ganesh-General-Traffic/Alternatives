@@ -87,7 +87,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
         </label>
       </div>
       <div className="border rounded-lg p-3 shadow-lg">
-        <table>
+        <table className="table-fixed">
           <thead className="border-b">
             <tr>
               {dataFrameTable.length > 0 &&
@@ -142,6 +142,11 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({ dataFrameTable }) => {
                 );
               })}
           </tbody>
+          {showBadRows && (
+            <caption className="caption-bottom text-gray-500 my-2">
+              Showing Bad Rows
+            </caption>
+          )}
         </table>
 
         {/* Pagination Controls */}
