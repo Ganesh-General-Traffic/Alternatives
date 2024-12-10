@@ -3,24 +3,14 @@ import React, { useState } from "react";
 import "./App.css";
 import FileUpload from "./components/FileUpload";
 import ToastWrapper from "./components/ToastWrapper";
-import PaginatedTable from "./components/PaginatedTable";
-
-export interface ViewState {
-  spinner: boolean;
-  fileUpload: boolean;
-  table: boolean; // Add other keys as needed
-}
 
 const App: React.FC = () => {
-  const [viewState, setViewState] = useState<ViewState>({
+  const [viewState, setViewState] = useState<{ [key: string]: boolean }>({
     spinner: false,
     fileUpload: true,
-    table: false,
   });
 
-  const [dataFrameTable, setDataFrameTable] = useState<
-    Array<{ [key: string]: any }>
-  >([]);
+  const [dataFrameTable, setDataFrameTable] = useState([]);
 
   return (
     <>
@@ -32,7 +22,17 @@ const App: React.FC = () => {
           setDataFrameTable={setDataFrameTable}
         />
       )}
-      {viewState.table && <PaginatedTable dataFrameTable={dataFrameTable} />}
+      <table>
+        <tbody>
+          {dataFrameTable.map((item, index) => (
+            <tr key={index}>
+              {Object.keys(item).map((key, keyIndex) => (
+                <td key={keyIndex}>{item[key]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </>
   );
 };

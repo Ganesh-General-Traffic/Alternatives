@@ -1,11 +1,11 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { toast } from "sonner";
-import { ViewState } from "../App";
 
 interface FileUploadProps {
-  setViewState: React.Dispatch<React.SetStateAction<ViewState>>;
-
+  setViewState: React.Dispatch<
+    React.SetStateAction<{ [key: string]: boolean }>
+  >;
   setDataFrameTable: Dispatch<SetStateAction<{ [key: string]: any }[]>>;
 }
 
@@ -43,12 +43,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
       return;
     }
 
-    setViewState((prev) =>
-      Object.keys(prev).reduce((acc, key) => {
-        acc[key as keyof ViewState] = key === "spinner";
-        return acc;
-      }, {} as ViewState)
-    );
+    setViewState((prev) => ({
+      ...prev,
+      spinner: true, // Show spinner
+      fileUpload: false, // Hide file upload
+    }));
 
     try {
       const formData = new FormData();
@@ -109,17 +108,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
         setDataFrameTable(jsonifiedDataFrame);
         toast.success("DataFrame formed");
         console.log("Final DataFrame:", jsonifiedDataFrame);
-        setViewState((prev) =>
-          Object.keys(prev).reduce((acc, key) => {
-            acc[key as keyof ViewState] = key === "table";
-            return acc;
-          }, {} as ViewState)
-        );
       }
     } catch (error: any) {
       toast.error(`Error uploading file: ${error.message || "Unknown error"}`);
       console.error("Error uploading file:", error);
     } finally {
+      setViewState((prev) => ({
+        ...prev,
+        spinner: false, // Show spinner
+        fileUpload: true, // Hide file upload
+      }));
     }
   };
 

@@ -5,14 +5,8 @@ import FileUpload from "./components/FileUpload";
 import ToastWrapper from "./components/ToastWrapper";
 import PaginatedTable from "./components/PaginatedTable";
 
-export interface ViewState {
-  spinner: boolean;
-  fileUpload: boolean;
-  table: boolean; // Add other keys as needed
-}
-
 const App: React.FC = () => {
-  const [viewState, setViewState] = useState<ViewState>({
+  const [viewState, setViewState] = useState<{ [key: string]: boolean }>({
     spinner: false,
     fileUpload: true,
     table: false,
@@ -32,7 +26,9 @@ const App: React.FC = () => {
           setDataFrameTable={setDataFrameTable}
         />
       )}
-      {viewState.table && <PaginatedTable dataFrameTable={dataFrameTable} />}
+      {dataFrameTable.length > 0 && (
+        <PaginatedTable dataFrameTable={dataFrameTable} />
+      )}
     </>
   );
 };

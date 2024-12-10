@@ -5,7 +5,7 @@ import FileUpload from "./components/FileUpload";
 import ToastWrapper from "./components/ToastWrapper";
 import PaginatedTable from "./components/PaginatedTable";
 
-export interface ViewState {
+interface ViewState {
   spinner: boolean;
   fileUpload: boolean;
   table: boolean; // Add other keys as needed

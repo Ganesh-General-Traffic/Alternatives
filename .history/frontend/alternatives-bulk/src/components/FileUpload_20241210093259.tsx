@@ -109,12 +109,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
         setDataFrameTable(jsonifiedDataFrame);
         toast.success("DataFrame formed");
         console.log("Final DataFrame:", jsonifiedDataFrame);
-        setViewState((prev) =>
-          Object.keys(prev).reduce((acc, key) => {
-            acc[key as keyof ViewState] = key === "table";
-            return acc;
-          }, {} as ViewState)
-        );
       }
     } catch (error: any) {
       toast.error(`Error uploading file: ${error.message || "Unknown error"}`);
