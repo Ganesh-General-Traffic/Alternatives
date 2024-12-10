@@ -29,14 +29,20 @@ const App: React.FC = () => {
   return (
     <>
       <ToastWrapper />
-      {viewState.spinner && <div className="spinner"></div>}
+      {viewState.spinner && (
+        <div className="h-[80vh] flex items-center justify-center">
+          <div className="spinner"></div>
+        </div>
+      )}
       {viewState.fileUpload && (
-        <FileUpload
-          setViewState={setViewState}
-          setDataFrameTable={setDataFrameTable}
-          setExistingClusterColumn={setExistingClusterColumn}
-          setNewPartColumn={setNewPartColumn}
-        />
+        <div className="flex h-[80vh] items-center justify-center">
+          <FileUpload
+            setViewState={setViewState}
+            setDataFrameTable={setDataFrameTable}
+            setExistingClusterColumn={setExistingClusterColumn}
+            setNewPartColumn={setNewPartColumn}
+          />
+        </div>
       )}
       {viewState.table && (
         <PaginatedTable

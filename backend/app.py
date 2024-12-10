@@ -9,7 +9,6 @@ from db import checkIfInProductTable, getNAlternatives
 app = Flask(__name__, static_folder="../frontend/alternatives-bulk/dist/assets", template_folder="../frontend/alternatives-bulk/dist")
 CORS(app)  # Enable CORS
 
-
 # Serve React build files
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
@@ -69,15 +68,14 @@ def upload_file():
             nAlts_col = col + "_NAlts"
             df[present_in_products_col] = df[col].apply(lambda x : checkIfInProductTable(x) if x else False)
             df[nAlts_col] = df[col].apply(lambda x : getNAlternatives(x) if x else "")
-        
-        time.sleep(1)  # Simulate delay
+            yield json.dumps({"message": f"Column : {col} Done!", "status": 1})
+            time.sleep(0.5)
 
         print("\nStep 4")
         yield json.dumps({"message": "Tagging Bad Rows", "status": 0})
         badRows = df.apply(lambda row: any(x == "" or x is False for x in row), axis=1)
         badRows |= df.iloc[:, 0] == df.iloc[:, 1]
         df["isBadRow"] = badRows
-
 
         # time.sleep(0.5)  # Simulate delay
 
