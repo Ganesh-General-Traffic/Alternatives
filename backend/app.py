@@ -80,7 +80,9 @@ def upload_file():
         print("\nStep 4")
         yield json.dumps({"message": "Tagging Bad Rows", "status": 0})
         badRows = df.apply(lambda row: any(x == "" or x is False for x in row), axis=1)
+        badRows |= df.iloc[:, 0] == df.iloc[:, 1]
         df["isBadRow"] = badRows
+
 
         time.sleep(0.5)  # Simulate delay
 
