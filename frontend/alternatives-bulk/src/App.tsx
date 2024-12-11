@@ -8,7 +8,7 @@ import PaginatedTable from "./components/PaginatedTable";
 export interface ViewState {
   spinner: boolean;
   fileUpload: boolean;
-  table: boolean; // Add other keys as needed
+  table: boolean;
 }
 
 const App: React.FC = () => {
@@ -50,6 +50,8 @@ const App: React.FC = () => {
             dataFrameTable={dataFrameTable}
             existingClusterColumn={existingClusterColumn}
             newPartColumn={newPartColumn}
+            setExistingClusterColumn={setExistingClusterColumn}
+            setNewPartColumn={setNewPartColumn}
           />
         </div>
       )}

@@ -1,15 +1,20 @@
 import React, { useState } from "react";
+import { RiRefreshLine } from "react-icons/ri";
 
 interface PaginatedTableProps {
   dataFrameTable: Array<{ [key: string]: any }>;
   existingClusterColumn: string;
   newPartColumn: string;
+  setExistingClusterColumn: React.Dispatch<React.SetStateAction<string>>;
+  setNewPartColumn: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const PaginatedTable: React.FC<PaginatedTableProps> = ({
   dataFrameTable,
   existingClusterColumn,
   newPartColumn,
+  setExistingClusterColumn,
+  setNewPartColumn,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 14;
@@ -84,6 +89,17 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
     return dataFrameTable.some((row) => row.isBadRow === true);
   };
 
+  const SWAP = () => {
+    const temp = existingClusterColumn;
+    setExistingClusterColumn(newPartColumn);
+    setNewPartColumn(temp);
+  };
+
+  const handleColumnsTagSwap = () => {
+    // const keys = Object.keys(dataFrameTable[0]);
+    SWAP();
+  };
+
   const paginationButtonClassName =
     "px-3 py-1 border rounded m-1 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-lg";
 
@@ -91,6 +107,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
   const [tooltipLeftPos, settooltipLeftPos] = useState(0);
   const [tooltipVisible, settooltipVisible] = useState(false);
   const [tooltipText, settooltipText] = useState("");
+  const [tooltipZindex, settooltipZindex] = useState(1);
 
   return (
     <>
@@ -99,11 +116,13 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
           top: `${tooltipTopPos}px`,
           left: `${tooltipLeftPos}px`,
           opacity: `${tooltipVisible ? "1" : "0"}`,
+          zIndex: `${tooltipZindex}`,
         }}
-        className={`absolute z-1 bg-gray-700 text-white p-2 rounded transition-all duration-100`}
+        className={`absolute bg-gray-700 text-white p-2 rounded transition-all duration-100`}
       >
         <span className="text-gray-300">{tooltipText}</span>
       </div>
+
       <div className="mb-6">
         <button
           className="cursor-pointer bg-blue-500 text-white px-6 py-3 rounded shadow-md hover:bg-blue-600"
@@ -113,9 +132,9 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
         </button>
       </div>
 
-      <div className="flex items-center my-4">
+      <div className="flex items-center my-4 select-none">
         {badRowsPresent() && (
-          <div className="flex item-center max-w-max select-none">
+          <div className="flex item-center max-w-max">
             <input
               type="checkbox"
               name="badRowsCheckBox"
@@ -182,9 +201,11 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                           settooltipTopPos(rect.top - 40); // Set tooltip position 100px above the element
                           settooltipLeftPos(rect.left);
                           settooltipVisible(true);
+                          settooltipZindex(1);
                         }}
                         onMouseLeave={() => {
                           settooltipVisible(false);
+                          settooltipZindex(-1);
                         }}
                       >
                         <div className="flex items-center max-w-max mx-auto">
@@ -246,10 +267,28 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
           )}
           {newPartColumn && existingClusterColumn && (
             <caption className="my-2">
-              Parts from <span className="text-blue-500">{newPartColumn}</span>{" "}
-              will be added to{" "}
-              <span className="text-green-500">{existingClusterColumn}</span>{" "}
-              clusters
+              <div className="flex max-w-max items-center">
+                <div>
+                  Parts from{" "}
+                  <span className="text-blue-500">{newPartColumn}</span> column
+                  will be added to{" "}
+                  <span className="text-green-500">
+                    {existingClusterColumn}
+                  </span>{" "}
+                  clusters
+                </div>
+                <div>
+                  <button
+                    className="mx-2 border border-blue-500 px-2 
+                                      rounded p-1 flex items-center 
+                                      hover:text-white hover:bg-blue-500 
+                                      outline-none"
+                    onClick={handleColumnsTagSwap}
+                  >
+                    Swap <RiRefreshLine />
+                  </button>
+                </div>
+              </div>
             </caption>
           )}
         </table>
