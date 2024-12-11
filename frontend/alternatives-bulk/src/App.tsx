@@ -50,6 +50,7 @@ const App: React.FC = () => {
             dataFrameTable={dataFrameTable}
             existingClusterColumn={existingClusterColumn}
             newPartColumn={newPartColumn}
+            setDataFrameTable={setDataFrameTable}
             setExistingClusterColumn={setExistingClusterColumn}
             setNewPartColumn={setNewPartColumn}
           />

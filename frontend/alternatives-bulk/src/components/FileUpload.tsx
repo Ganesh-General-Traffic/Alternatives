@@ -119,10 +119,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       // After streaming ends, update the DataFrameTable state
       if (accumulatedDataFrame.length > 0) {
-        const updatedDataFrame = accumulatedDataFrame.map((row: any) => ({
-          ...row,
-          Processed: false, // Add 'Processed' column with all rows set to false
-        }));
+        const updatedDataFrame = accumulatedDataFrame.map(
+          (row: any, index: number) => ({
+            ...row,
+            Processed: 0, // Add 'Processed' column with all rows set to 0
+            id: index, // Set 'id' to the row's index
+          })
+        );
 
         setDataFrameTable(updatedDataFrame);
 

@@ -1,4 +1,4 @@
-from .db import get_connection
+from db import get_connection
 
 def run_query(query):
     # Connection parameters
@@ -12,7 +12,7 @@ def run_query(query):
     # connection = pyodbc.connect(
     #     f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
     # )
-    connection = get_connection
+    connection = get_connection()
     
     try:
         cursor = connection.cursor()
@@ -147,7 +147,13 @@ def pushToDBPandasApply(cols):
         # Join all the lines into a single docstring
         docstring_output = "".join(docstring).rstrip(",")  # Remove the trailing comma
         # print(docstring_output)
-        # run_insert_query(docstring_output)
+        run_insert_query(docstring_output)
     #     print(f"PART : {og_gt_part}, NEW : {new_part} - QUERY SUCCESFUL")
     except:
+        raise Exception
         print(f"PART : {og_gt_part}, NEW : {new_part} - ****** ERROR ******")
+
+
+def removePartFromAlternatives(part:str):
+    queryString = f"DELETE from dbo.Alternatives WHERE Part = '{part}' or AlternatePart = '{part}'"
+    run_delete_query(queryString)

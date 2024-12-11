@@ -10,6 +10,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/updateDB": {
+        target: "http://localhost:3000", // Flask backend
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });

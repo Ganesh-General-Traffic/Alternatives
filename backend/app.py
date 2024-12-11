@@ -4,6 +4,7 @@ import pandas as pd
 import json
 from flask_cors import CORS
 
+from utils import pushToDBPandasApply, removePartFromAlternatives
 from db import checkIfInProductTable, getNAlternatives
 
 app = Flask(__name__, static_folder="../frontend/alternatives-bulk/dist/assets", template_folder="../frontend/alternatives-bulk/dist")
@@ -125,6 +126,22 @@ def upload_file():
 
 
     return Response(process_file(), mimetype="text/event-stream")
+
+
+@app.route("/updateDB", methods=["POST"])
+def updateDB():
+    # Debugging information
+    req_json = request.get_json()
+    try:
+        print(f"Request JSON data: {request.get_json()}")
+        removePartFromAlternatives(req_json['partList'][1])
+        pushToDBPandasApply([req_json['partList'][0],req_json['partList'][1]])
+        print("\n")
+        return json.dumps({"message":"Good"})
+    except:
+        print("\n")
+        return jsonify(req_json), 200
+
 
 
 if __name__ == "__main__":

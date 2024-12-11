@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { RiRefreshLine } from "react-icons/ri";
 import SwapConfirmationModal from "./SwapConfirmationModal";
+import { toast } from "sonner";
 
 interface PaginatedTableProps {
   dataFrameTable: Array<{ [key: string]: any }>;
@@ -8,6 +9,13 @@ interface PaginatedTableProps {
   newPartColumn: string;
   setExistingClusterColumn: React.Dispatch<React.SetStateAction<string>>;
   setNewPartColumn: React.Dispatch<React.SetStateAction<string>>;
+  setDataFrameTable: React.Dispatch<
+    React.SetStateAction<
+      {
+        [key: string]: any;
+      }[]
+    >
+  >;
 }
 
 const PaginatedTable: React.FC<PaginatedTableProps> = ({
@@ -16,6 +24,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
   newPartColumn,
   setExistingClusterColumn,
   setNewPartColumn,
+  setDataFrameTable,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 14;
@@ -26,7 +35,10 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
   } | null>(null);
 
   const [showBadRows, setShowBadRows] = useState(false);
-  const [columnsToHide, setColumnsToHide] = useState<string[]>(["isBadRow"]); // Initialize with isBadRow
+  const [columnsToHide, setColumnsToHide] = useState<string[]>([
+    "isBadRow",
+    "id",
+  ]); // Initialize with isBadRow
 
   // Calculate total pages
   const totalPages = Math.ceil(dataFrameTable.length / rowsPerPage);
@@ -110,6 +122,58 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
     setSwapConfirmationModal(false);
   };
 
+  const [mainSaveButtonDisabled, setMainSaveButtonDisabled] = useState(false);
+
+  const handleDBUpdate = () => {
+    setMainSaveButtonDisabled(true);
+
+    // Iterate through dataFrameTable array
+    dataFrameTable
+      // .filter((row) => !row.isBadRow)
+      .forEach(async (row) => {
+        // Set Processed to -1 before making the request
+        setDataFrameTable((prev) =>
+          prev.map((item) =>
+            item.id === row.id ? { ...item, Processed: -1 } : item
+          )
+        );
+
+        const response = await fetch("/updateDB", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            partList: [row[existingClusterColumn], row[newPartColumn]],
+          }), // Send each row in the body
+        });
+
+        if (!response.ok) {
+          console.error("Error:", response.statusText, "for row:", row);
+
+          // Set Processed to 0 on error
+          setDataFrameTable((prev) =>
+            prev.map((item) =>
+              item.id === row.id ? { ...item, Processed: 0 } : item
+            )
+          );
+        } else {
+          // const data = await response.json();
+          // console.log("Success for row:", data);
+
+          // Set Processed to 1 on success
+          setDataFrameTable((prev) =>
+            prev.map((item) =>
+              item.id === row.id ? { ...item, Processed: 1 } : item
+            )
+          );
+        }
+      });
+
+    toast.success("Done, check Processed column");
+    setMainSaveButtonDisabled(false);
+  };
+
   const paginationButtonClassName =
     "px-3 py-1 border rounded m-1 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:shadow-lg";
 
@@ -187,6 +251,23 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
         </div>
       </div>
 
+      {!badRowsPresent() && (
+        <div>
+          <button
+            className="border border-blue-500 w-full p-2 my-2 
+                      rounded hover:bg-blue-500 hover:text-white 
+                      disabled:cursor-not-allowed
+                      disabled:bg-gray-300
+                      disabled:border-gray-300
+                      disabled:text-gray-100"
+            onClick={handleDBUpdate}
+            disabled={mainSaveButtonDisabled}
+          >
+            Update on Alternatives Database
+          </button>
+        </div>
+      )}
+
       <div className="border rounded-lg p-3 shadow-lg">
         <table className="table-fixed min-w-full">
           <thead className="border-b select-none">
@@ -256,10 +337,14 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                       .map((key, colIndex) => (
                         <td className="py-2" key={colIndex}>
                           {key === "Processed" ? (
-                            item[key] === true ? (
+                            item[key] === 1 ? (
                               <span className="text-green-500">✅</span> // Render tick for true
-                            ) : (
+                            ) : item[key] === 0 ? (
                               <span className="text-red-500">❌</span> // Render cross for false
+                            ) : item[key] === -1 ? (
+                              <div className="spinner"></div>
+                            ) : (
+                              item[key] // Render the value for other cases
                             )
                           ) : typeof item[key] === "boolean" ? (
                             item[key].toString()
