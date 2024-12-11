@@ -195,6 +195,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <span className="mx-2">Upload File</span>
         </button>
       )}
+      <p className="italic">
+        <strong>Note</strong>: The CSV File always needs to have column names as
+        first row,
+        <br />
+        <span>and should contain a miminum of two columns</span>
+      </p>
     </div>
   );
 };
