@@ -39,9 +39,12 @@ def upload_file():
             yield json.dumps({"message": "File read successfully.", "status": 1}) 
         except Exception as e:
             yield json.dumps({"message": f"Error reading file: {str(e)}", "status": -1}) 
-            return
+
+        if len(df.columns) < 2:
+            yield json.dumps({"message": f"PDF has less than 2 columns", "status": -1}) 
+
         
-        time.sleep(0.5)  # Simulate delay
+        time.sleep(0.25)  # Simulate delay
 
         # Step 2: Replacing NaN values
         print("\nStep 2")
@@ -57,7 +60,7 @@ def upload_file():
             yield json.dumps({"message": f"Error replacing NaN values: {str(e)}", "status": -1})
             return
 
-        time.sleep(0.5)  # Simulate delay
+        time.sleep(0.25)  # Simulate delay
 
         # Step 3: Processing completed
         print("\nStep 3")

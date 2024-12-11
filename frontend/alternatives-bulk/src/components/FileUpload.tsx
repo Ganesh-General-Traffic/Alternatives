@@ -92,6 +92,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
               toast.success(messageObj.message);
             } else if (messageObj.status === -1) {
               toast.error(messageObj.message);
+              throw "";
             } else {
               toast.info(messageObj.message);
             }
