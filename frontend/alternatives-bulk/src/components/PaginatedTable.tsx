@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { RiRefreshLine } from "react-icons/ri";
+import SwapConfirmationModal from "./SwapConfirmationModal";
 
 interface PaginatedTableProps {
   dataFrameTable: Array<{ [key: string]: any }>;
@@ -97,7 +98,16 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
 
   const handleColumnsTagSwap = () => {
     // const keys = Object.keys(dataFrameTable[0]);
+    setSwapConfirmationModal(true);
+  };
+
+  const handleSwapConfirm = () => {
+    setSwapConfirmationModal(false);
     SWAP();
+  };
+
+  const handleSwapCancel = () => {
+    setSwapConfirmationModal(false);
   };
 
   const paginationButtonClassName =
@@ -108,6 +118,9 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
   const [tooltipVisible, settooltipVisible] = useState(false);
   const [tooltipText, settooltipText] = useState("");
   const [tooltipZindex, settooltipZindex] = useState(1);
+
+  const [swapConfirmationModalVisible, setSwapConfirmationModal] =
+    useState(false);
 
   return (
     <>
@@ -347,6 +360,24 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
               Last
             </button>
           </div>
+        )}
+        {swapConfirmationModalVisible && (
+          <SwapConfirmationModal
+            currClusterSum={dataFrameTable.reduce((sum, row) => {
+              // Ensure the column exists and is a number
+              const value = row[existingClusterColumn + "_NAlts"];
+              return sum + (typeof value === "number" ? value : 0);
+            }, 0)}
+            fromColumnSum={dataFrameTable.reduce((sum, row) => {
+              // Ensure the column exists and is a number
+              const value = row[newPartColumn + "_NAlts"];
+              return sum + (typeof value === "number" ? value : 0);
+            }, 0)}
+            handleSwapConfirm={handleSwapConfirm}
+            handleSwapCancel={handleSwapCancel}
+            existingClusterColumn={existingClusterColumn}
+            newPartColumn={newPartColumn}
+          />
         )}
       </div>
     </>
