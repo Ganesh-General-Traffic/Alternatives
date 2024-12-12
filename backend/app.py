@@ -73,13 +73,16 @@ def upload_file():
         print("\nStep 3")
         yield json.dumps({"message": "Getting N Alts for each part.", "status": 1})
 
+        time.sleep(0.5)
+
         for col in df:
-            time.sleep(0.5)
+            
             yield json.dumps({"message": f"Checking : {col} if all rows are present in products", "status": 0})
             present_in_products_col = col + "_PresentInProducts"
             nAlts_col = col + "_NAlts"
             df[present_in_products_col] = df[col].apply(lambda x : checkIfInProductTable(x) if x else False)
             df[nAlts_col] = df[col].apply(lambda x : getNAlternatives(x) if x else "")
+            time.sleep(0.5)
             yield json.dumps({"message": f"Column : {col} Done!", "status": 1})
             time.sleep(0.5)
 
@@ -106,8 +109,8 @@ def upload_file():
             existingClusterColumn = df.columns[0]
             newPartColumn = df.columns[1]
 
-        time.sleep(0.5)  # Simulate delay
-        yield json.dumps({"status":0, 
+        time.sleep(1)  # Simulate delay
+        yield json.dumps({"status":0,
                           "message":"Finding Existing Cluster...",
                           "existingClusterColumn":existingClusterColumn,
                           "newPartColumn":newPartColumn})
@@ -117,20 +120,21 @@ def upload_file():
         #                   "existingClusterColumn":"",
         #                   "newPartColumn":""})
 
-        time.sleep(0.5)
+        time.sleep(1)
 
         # Step 4: Chunked Data Yielding
-        chunk_size = 25
+        chunk_size = 5
         total_chunks = (len(df) + chunk_size - 1) // chunk_size  # Calculate total number of chunks
 
         for chunk_index, start_row in enumerate(range(0, len(df), chunk_size), start=1):
             chunk = df.iloc[start_row:start_row + chunk_size]  # Slice the DataFrame into chunks
+            time.sleep(0.5)  # Optional: simulate delay
             yield json.dumps({
                 "data": chunk.to_dict(orient='records'),
                 "status": 0,
                 "message": f"Receiving chunk {chunk_index} of {total_chunks}..."
             })
-            time.sleep(0.5)  # Optional: simulate delay
+            time.sleep(0.25)  # Optional: simulate delay
 
 
     return Response(process_file(), mimetype="text/event-stream")
