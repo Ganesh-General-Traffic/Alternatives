@@ -40,8 +40,10 @@ def upload_file():
         
         try:
             df = pd.read_csv(io.StringIO(file.stream.read().decode("utf-8")))
+            time.sleep(0.25)  # Simulate delay
             yield json.dumps({"message": "File read successfully.", "status": 1}) 
         except Exception as e:
+            time.sleep(0.25)  # Simulate delay
             yield json.dumps({"message": f"Error reading file: {str(e)}", "status": -1}) 
 
         if len(df.columns) < 2:
@@ -58,9 +60,10 @@ def upload_file():
             df = df[~((df.iloc[:, 0] == "") & (df.iloc[:, 1] == ""))]
             df = df[df.columns[:2]]
             df.drop_duplicates(subset=df.columns[:2], keep='first', inplace=True)
-
+            time.sleep(0.25)  # Simulate delay
             yield json.dumps({"message": "Dropped Unnecessary Columns and duplicate rows.", "status": 1})
         except Exception as e:
+            time.sleep(0.25)  # Simulate delay
             yield json.dumps({"message": f"Error replacing NaN values: {str(e)}", "status": -1})
             return
 
@@ -81,6 +84,7 @@ def upload_file():
             time.sleep(0.5)
 
         print("\nStep 4")
+        time.sleep(0.25)  # Simulate delay
         yield json.dumps({"message": "Tagging Bad Rows", "status": 0})
         badRows = df.apply(lambda row: any(x == "" or x is False for x in row), axis=1)
         badRows |= df.iloc[:, 0] == df.iloc[:, 1]
@@ -102,6 +106,7 @@ def upload_file():
             existingClusterColumn = df.columns[0]
             newPartColumn = df.columns[1]
 
+        time.sleep(0.25)  # Simulate delay
         yield json.dumps({"status":0, 
                           "message":"Finding Existing Cluster...",
                           "existingClusterColumn":existingClusterColumn,
@@ -125,7 +130,7 @@ def upload_file():
                 "status": 0,
                 "message": f"Receiving chunk {chunk_index} of {total_chunks}..."
             })
-            time.sleep(0.25)  # Optional: simulate delay
+            time.sleep(0.5)  # Optional: simulate delay
 
 
     return Response(process_file(), mimetype="text/event-stream")
