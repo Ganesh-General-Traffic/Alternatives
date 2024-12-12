@@ -46,16 +46,35 @@
 }
 
 .spinner {
-  width: 56px;
-  height: 56px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: conic-gradient(#0000 10%, #474bff);
-  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 9px), #000 0);
-  animation: spinner-zp9dbg 1s infinite linear;
+  display: inline-block;
+  position: relative;
+  background: linear-gradient(0deg, rgba(0, 68, 255, 0.219) 33%, #002fff 100%);
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
 }
 
-@keyframes spinner-zp9dbg {
-  to {
-    transform: rotate(1turn);
+.spinner::after {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg)
+  }
+
+  100% {
+    transform: rotate(360deg)
   }
 }
