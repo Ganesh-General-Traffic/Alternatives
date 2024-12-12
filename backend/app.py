@@ -59,6 +59,8 @@ def upload_file():
             df.fillna("",inplace=True)
             df = df[~((df.iloc[:, 0] == "") & (df.iloc[:, 1] == ""))]
             df = df[df.columns[:2]]
+            for col in df:
+                df[col] = df[col].str.upper()
             df.drop_duplicates(subset=df.columns[:2], keep='first', inplace=True)
             time.sleep(0.5)  # Simulate delay
             yield json.dumps({"message": "Dropped Unnecessary Columns and duplicate rows.", "status": 1})
