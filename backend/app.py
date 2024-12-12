@@ -158,4 +158,5 @@ if __name__ == "__main__":
     if not PROD:
         app.run(debug=True, port=3000, threaded=True)
     else:
-        app.run(port=5001, threaded=True)
+        app.run(host='0.0.0.0', port=5001, threaded=True)
+
