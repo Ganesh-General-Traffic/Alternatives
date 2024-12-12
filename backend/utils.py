@@ -120,7 +120,7 @@ def run_insert_query(docstring):
 
 def pushToDBPandasApply(cols):
     try:
-        og_gt_part = cols[0]
+        og_gt_part = cols[0] # This is the existing clusters part
         new_part = cols[1]
         
         res = getDBResults(og_gt_part)
@@ -146,12 +146,16 @@ def pushToDBPandasApply(cols):
         
         # Join all the lines into a single docstring
         docstring_output = "".join(docstring).rstrip(",")  # Remove the trailing comma
+        # print("\n")
         # print(docstring_output)
+        # print("\n\n\n\n")
+        
         run_insert_query(docstring_output)
     #     print(f"PART : {og_gt_part}, NEW : {new_part} - QUERY SUCCESFUL")
     except:
         raise Exception
         print(f"PART : {og_gt_part}, NEW : {new_part} - ****** ERROR ******")
+    
 
 
 def removePartFromAlternatives(part:str):
