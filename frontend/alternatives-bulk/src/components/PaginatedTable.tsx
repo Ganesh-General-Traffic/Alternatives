@@ -40,6 +40,8 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
     "id",
   ]); // Initialize with isBadRow
 
+  const [swapCaptionVisible, setSwapCaptionVisible] = useState(true);
+
   // Calculate total pages
   const totalPages = Math.ceil(dataFrameTable.length / rowsPerPage);
 
@@ -124,54 +126,75 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
 
   const [mainSaveButtonDisabled, setMainSaveButtonDisabled] = useState(false);
 
-  const handleDBUpdate = () => {
+  const handleDBUpdate = async () => {
     setMainSaveButtonDisabled(true);
 
-    // Iterate through dataFrameTable array
-    dataFrameTable
-      // .filter((row) => !row.isBadRow)
-      .forEach(async (row) => {
-        // Set Processed to -1 before making the request
-        setDataFrameTable((prev) =>
-          prev.map((item) =>
-            item.id === row.id ? { ...item, Processed: -1 } : item
-          )
-        );
+    // Set all rows to `Processed: -1` before sending the request
+    setDataFrameTable((prev) =>
+      prev.map((item) => ({ ...item, Processed: -1 }))
+    );
 
-        const response = await fetch("/updateDB", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            partList: [row[existingClusterColumn], row[newPartColumn]],
-          }), // Send each row in the body
-        });
-
-        if (!response.ok) {
-          console.error("Error:", response.statusText, "for row:", row);
-
-          // Set Processed to 0 on error
-          setDataFrameTable((prev) =>
-            prev.map((item) =>
-              item.id === row.id ? { ...item, Processed: 0 } : item
-            )
-          );
-        } else {
-          // const data = await response.json();
-          // console.log("Success for row:", data);
-
-          // Set Processed to 1 on success
-          setDataFrameTable((prev) =>
-            prev.map((item) =>
-              item.id === row.id ? { ...item, Processed: 1 } : item
-            )
-          );
-        }
+    try {
+      const response = await fetch("/updateDB", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          partList: dataFrameTable.map((row) => [
+            row[existingClusterColumn],
+            row[newPartColumn],
+          ]),
+        }),
       });
 
-    toast.success("Done, check Processed column");
-    setMainSaveButtonDisabled(false);
+      if (!response.ok) {
+        toast.error(`Something went wrong. Status : ${response.statusText}`);
+        throw new Error(`Failed to update DB: ${response.statusText}`);
+      }
+
+      // Process the event stream
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let done = false;
+
+      while (!done && reader) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          const decodedValue = decoder.decode(value);
+
+          // Split and process each line separately
+          for (const line of decodedValue.split("\n")) {
+            if (line.trim() !== "") {
+              const parsed = JSON.parse(line);
+              const { part, status } = parsed;
+
+              // Update Processed column based on status
+              setDataFrameTable((prev) => {
+                const updatedTable = prev.map((item) =>
+                  item[existingClusterColumn] === part[0] &&
+                  item[newPartColumn] === part[1]
+                    ? { ...item, Processed: status === "success" ? 1 : 0 }
+                    : item
+                );
+                return updatedTable;
+              });
+
+              // Wait briefly to ensure React processes the update
+              await new Promise((resolve) => setTimeout(resolve, 50)); // Small delay to allow UI rendering
+            }
+          }
+        }
+      }
+
+      toast.success("Done, check Processed column");
+    } catch (error) {
+      console.error("Error updating DB:", error);
+      toast.error("Failed to update DB");
+    } finally {
+      setSwapCaptionVisible(false);
+    }
   };
 
   const paginationButtonClassName =
@@ -363,7 +386,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
               Showing Bad Rows
             </caption>
           )}
-          {newPartColumn && existingClusterColumn && (
+          {newPartColumn && existingClusterColumn && swapCaptionVisible && (
             <caption className="my-2">
               <div className="flex max-w-max items-center">
                 <div>
