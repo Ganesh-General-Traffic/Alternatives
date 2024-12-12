@@ -33,24 +33,24 @@ def upload_file():
 
     @stream_with_context
     def process_file():
-        time.sleep(0.25)  # Simulate delay
+        time.sleep(0.5)  # Simulate delay
         # Step 1: Reading file
         print("\nStep 1")
         # yield json.dumps({"message": "Reading file...", "status": 1})
         
         try:
             df = pd.read_csv(io.StringIO(file.stream.read().decode("utf-8")))
-            time.sleep(0.25)  # Simulate delay
+            time.sleep(0.5)  # Simulate delay
             yield json.dumps({"message": "File read successfully.", "status": 1}) 
         except Exception as e:
-            time.sleep(0.25)  # Simulate delay
+            time.sleep(0.5)  # Simulate delay
             yield json.dumps({"message": f"Error reading file: {str(e)}", "status": -1}) 
 
         if len(df.columns) < 2:
             yield json.dumps({"message": f"PDF has less than 2 columns", "status": -1}) 
 
         
-        time.sleep(0.25)  # Simulate delay
+        time.sleep(0.5)  # Simulate delay
 
         # Step 2: Replacing NaN values
         print("\nStep 2")
@@ -60,21 +60,21 @@ def upload_file():
             df = df[~((df.iloc[:, 0] == "") & (df.iloc[:, 1] == ""))]
             df = df[df.columns[:2]]
             df.drop_duplicates(subset=df.columns[:2], keep='first', inplace=True)
-            time.sleep(0.25)  # Simulate delay
+            time.sleep(0.5)  # Simulate delay
             yield json.dumps({"message": "Dropped Unnecessary Columns and duplicate rows.", "status": 1})
         except Exception as e:
-            time.sleep(0.25)  # Simulate delay
+            time.sleep(0.5)  # Simulate delay
             yield json.dumps({"message": f"Error replacing NaN values: {str(e)}", "status": -1})
             return
 
-        time.sleep(0.25)  # Simulate delay
+        time.sleep(0.5)  # Simulate delay
 
         # Step 3: Processing completed
         print("\nStep 3")
         yield json.dumps({"message": "Getting N Alts for each part.", "status": 1})
 
         for col in df:
-            time.sleep(0.25)
+            time.sleep(0.5)
             yield json.dumps({"message": f"Checking : {col} if all rows are present in products", "status": 0})
             present_in_products_col = col + "_PresentInProducts"
             nAlts_col = col + "_NAlts"
@@ -84,7 +84,7 @@ def upload_file():
             time.sleep(0.5)
 
         print("\nStep 4")
-        time.sleep(0.25)  # Simulate delay
+        time.sleep(0.5)  # Simulate delay
         yield json.dumps({"message": "Tagging Bad Rows", "status": 0})
         badRows = df.apply(lambda row: any(x == "" or x is False for x in row), axis=1)
         badRows |= df.iloc[:, 0] == df.iloc[:, 1]
@@ -106,7 +106,7 @@ def upload_file():
             existingClusterColumn = df.columns[0]
             newPartColumn = df.columns[1]
 
-        time.sleep(0.25)  # Simulate delay
+        time.sleep(0.5)  # Simulate delay
         yield json.dumps({"status":0, 
                           "message":"Finding Existing Cluster...",
                           "existingClusterColumn":existingClusterColumn,
@@ -154,7 +154,7 @@ def updateDB():
             except Exception as e:
                 yield json.dumps({"part": part_pair, "status": "error", "message": str(e)}) + "\n"
             finally:
-                time.sleep(0.25)
+                time.sleep(0.5)
 
     return Response(process_parts(), content_type="application/json; charset=utf-8")
 
@@ -164,5 +164,5 @@ if __name__ == "__main__":
     if not PROD:
         app.run(debug=True, port=3000, threaded=True)
     else:
-        app.run(host='0.0.0.0', port=5001, threaded=True)
+        app.run(host='0.0.0.0', port=5001)
 
