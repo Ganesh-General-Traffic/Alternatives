@@ -33,6 +33,7 @@ def upload_file():
 
     @stream_with_context
     def process_file():
+        time.sleep(0.25)  # Simulate delay
         # Step 1: Reading file
         print("\nStep 1")
         # yield json.dumps({"message": "Reading file...", "status": 1})
@@ -124,7 +125,7 @@ def upload_file():
                 "status": 0,
                 "message": f"Receiving chunk {chunk_index} of {total_chunks}..."
             })
-            time.sleep(0.1)  # Optional: simulate delay
+            time.sleep(0.25)  # Optional: simulate delay
 
 
     return Response(process_file(), mimetype="text/event-stream")
