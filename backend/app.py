@@ -10,6 +10,8 @@ from db import checkIfInProductTable, getNAlternatives
 app = Flask(__name__, static_folder="../frontend/alternatives-bulk/dist/assets", template_folder="../frontend/alternatives-bulk/dist")
 CORS(app)  # Enable CORS
 
+PROD = True
+
 # Serve React build files
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
@@ -130,19 +132,30 @@ def upload_file():
 
 @app.route("/updateDB", methods=["POST"])
 def updateDB():
-    # Debugging information
     req_json = request.get_json()
-    try:
-        print(f"Request JSON data: {request.get_json()}")
-        removePartFromAlternatives(req_json['partList'][1])
-        pushToDBPandasApply([req_json['partList'][0],req_json['partList'][1]])
-        print("\n")
-        return json.dumps({"message":"Good"})
-    except:
-        print("\n")
-        return jsonify(req_json), 200
+    if not req_json or 'partList' not in req_json:
+        return jsonify({"error": "Invalid request data"}), 400
+
+    @stream_with_context
+    def process_parts():
+        for part_pair in req_json['partList']:
+            try:
+                # Process each part pair
+                print(part_pair)
+                removePartFromAlternatives(part_pair[1])
+                pushToDBPandasApply(part_pair)
+                yield json.dumps({"part": part_pair, "status": "success"}) + "\n"
+            except Exception as e:
+                yield json.dumps({"part": part_pair, "status": "error", "message": str(e)}) + "\n"
+            finally:
+                time.sleep(0.25)
+
+    return Response(process_parts(), content_type="application/json; charset=utf-8")
 
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=3000, threaded=True)
+    if not PROD:
+        app.run(debug=True, port=3000, threaded=True)
+    else:
+        app.run(port=5001, threaded=True)
