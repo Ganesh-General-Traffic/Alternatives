@@ -31,7 +31,7 @@ const App: React.FC = () => {
       <ToastWrapper />
       {viewState.spinner && (
         <div className="h-[80vh] flex items-center justify-center">
-          <div className="spinner"></div>
+          <div className="loader"></div>
         </div>
       )}
       {viewState.fileUpload && (
