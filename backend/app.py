@@ -41,13 +41,13 @@ def upload_file():
         try:
             df = pd.read_csv(io.StringIO(file.stream.read().decode("utf-8")))
             time.sleep(0.5)  # Simulate delay
-            yield json.dumps({"message": "File read successfully.", "status": 1}) 
+            yield json.dumps({"message": "File read successfully.", "status": 1})
         except Exception as e:
             time.sleep(0.5)  # Simulate delay
-            yield json.dumps({"message": f"Error reading file: {str(e)}", "status": -1}) 
+            yield json.dumps({"message": f"Error reading file: {str(e)}", "status": -1})
 
         if len(df.columns) < 2:
-            yield json.dumps({"message": f"PDF has less than 2 columns", "status": -1}) 
+            yield json.dumps({"message": f"PDF has less than 2 columns", "status": -1})
 
         
         time.sleep(0.5)  # Simulate delay
@@ -151,18 +151,22 @@ def updateDB():
     @stream_with_context
     def process_parts():
         for part_pair in req_json['partList']:
+
             try:
                 # Process each part pair
                 print(part_pair)
                 removePartFromAlternatives(part_pair[1])
+                time.sleep(0.1)
                 pushToDBPandasApply(part_pair)
-                yield json.dumps({"part": part_pair, "status": "success"}) + "\n"
+                time.sleep(0.1)
+                yield json.dumps({"part": part_pair, "status": "success"})
             except Exception as e:
-                yield json.dumps({"part": part_pair, "status": "error", "message": str(e)}) + "\n"
+                yield json.dumps({"part": part_pair, "status": "error", "message": str(e)})
             finally:
+                print(f"{part_pair} done")
                 time.sleep(0.5)
 
-    return Response(process_parts(), content_type="application/json; charset=utf-8")
+    return Response(process_parts(), content_type="text/event-stream")
 
 
 
